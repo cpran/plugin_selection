@@ -20,4 +20,4 @@ A **selection table** is simply a `Table` that contains the following fields:
 Requirements
 ------------
 
-* [`utils`](https://gitlab.com/cpran/plugin_utils)
+* [utils](https://gitlab.com/cpran/plugin_utils)
