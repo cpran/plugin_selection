@@ -4,34 +4,34 @@ Homepage: https://gitlab.com/cpran/plugin_selection
 Version: 0.0.1
 Maintainer: José Joaquín Atria <jjatria@gmail.com>
 Depends:
-  - praat: 5.0.0+
-  - cpran/utils: 0.0.1+
+  praat: 5.0.0+
+  cpran/utils: 0.0.1+
 Recommends:
 License: GPL3
 Readme: readme.md
 Description:
-  - Short: procedures to manage Praat selections
-  - Long: >
-      This plugin defines a set of procedures to try to make it easier to manage
-      the selection of objects in Praat. It is an attempt at providing some sort
-      of informal API of sorts to save various selections, restore them at will,
-      modify them, etc.
+  Short: procedures to manage Praat selections
+  Long: >
+    This plugin defines a set of procedures to try to make it easier to manage
+    the selection of objects in Praat. It is an attempt at providing some sort
+    of informal API of sorts to save various selections, restore them at will,
+    modify them, etc.
 
-      Praat does not allow for the creation of custom object types, so it was
-      necessary to generate some abstraction of a selection that could be
-      represented using the existing object types. A **selection table** is a
-      object of type `Table` that represents a given selection. The procedures
-      provide ways to generate them based on the existing selection, to create
-      new ones procedurally, and to make them either from subsets, or as
-      combinations of existing tables.
+    Praat does not allow for the creation of custom object types, so it was
+    necessary to generate some abstraction of a selection that could be
+    represented using the existing object types. A **selection table** is a
+    object of type `Table` that represents a given selection. The procedures
+    provide ways to generate them based on the existing selection, to create
+    new ones procedurally, and to make them either from subsets, or as
+    combinations of existing tables.
 
-      A **selection table** is simply a `Table` that contains the following
-      fields:
+    A **selection table** is simply a `Table` that contains the following
+    fields:
 
-      * `type`, holding the type of a given object as a string
-      * `name`, holding the name of a given object as a string
-      * `n`, a placeholder variable holding the value `1`
-      * `id`, holding the id number of the corresponding object
+    * `type`, holding the type of a given object as a string
+    * `name`, holding the name of a given object as a string
+    * `n`, a placeholder variable holding the value `1`
+    * `id`, holding the id number of the corresponding object
 
-      **Any** `Table` that contains _at least_ these columns will be considered
-      a **selection table**, and can be used with these procedures.
+    **Any** `Table` that contains _at least_ these columns will be considered
+    a **selection table**, and can be used with these procedures.
