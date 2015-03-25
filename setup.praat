@@ -21,13 +21,13 @@
 # Base menu
 Add menu command: "Objects", "Praat", "selection", "CPrAN", 1, ""
 
-Add menu command: "Objects", "Praat", "Copy selected objects...", "selection",   2, "scripts/copy_selected.praat"
-Add menu command: "Objects", "Praat", "Sort selected objects...", "selection",   2, "scripts/sort_objects.praat"
+Add menu command: "Objects", "Praat", "Copy selected objects...", "selection", 2, "scripts/copy_selected.praat"
+Add menu command: "Objects", "Praat", "Sort selected objects...", "selection", 2, "scripts/sort_objects.praat"
 
 # Object selection menu
-Add menu command: "Objects", "Praat", "Select one type...",       "selection -", 2, "scripts/select_one_type.praat"
-Add menu command: "Objects", "Praat", "Invert selection",         "selection -", 2, "scripts/invert_selection.praat"
-Add menu command: "Objects", "Praat", "Save selection",           "selection -", 2, "scripts/save_selection.praat"
+Add menu command: "Objects", "Praat", "Select one type...",       "selection", 2, "scripts/select_one_type.praat"
+Add menu command: "Objects", "Praat", "Invert selection",         "selection", 2, "scripts/invert_selection.praat"
+Add menu command: "Objects", "Praat", "Save selection",           "selection", 2, "scripts/save_selection.praat"
 
 ## Dynamic commands
 
