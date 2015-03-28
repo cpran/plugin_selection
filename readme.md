@@ -42,7 +42,7 @@ with two exceptions: [saveSelection()][saveselection] and
 Below, all procedures are explained in an order that will hopefully make it
 easier to learn how to use them.
 
-Please see [the documentation](https://gitlab.com/cpran/plugin_selection/wikis)
+Please see [the documentation](https://gitlab.com/cpran/plugin_selection/wikis/home)
 for more detailed information on how to use these procedures.
 
 ## Requirements:
