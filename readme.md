@@ -1,11 +1,11 @@
 # Selection tools
 
-The file [`selection.proc`][selection] defines a set of procedures to try to
+The file [selection.proc][selection] defines a set of procedures to try to
 make it easier to manage the selection of objects in Praat. It is an attempt at
 providing some sort of informal API of sorts to save various selections, restore
 them at will, modify them, etc.
 
-[selection]: https://github.com/jjatria/plugin_jjatools/blob/master/procedures/selection.proc
+[selection]: https://gitlab.com/cpran/plugin_selection/blob/master/procedures/selection.proc
 
 ## Usage
 
@@ -33,7 +33,11 @@ A **selection table** is simply a `Table` that contains the following fields:
 **selection table**, and can be used with these procedures.
 
 Almost every procedure here uses **selection tables** to manage the selection,
-with two exceptions: [`saveSelection()`][] and [`restoreSelection()`][].
+with two exceptions: [saveSelection()][saveselection] and
+[restoreSelection()][restoreselection].
+
+[saveselection]: https://gitlab.com/cpran/plugin_selection/wikis/home#saveselection
+[restoreselection]: https://gitlab.com/cpran/plugin_selection/wikis/home#restoreselection
 
 Below, all procedures are explained in an order that will hopefully make it
 easier to learn how to use them.
