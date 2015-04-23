@@ -11,6 +11,12 @@
 # A copy of the GNU General Public License is available at
 # <http://www.gnu.org/licenses/>.
 
+keep_selection = 0
+
 include ../procedures/selection.proc
 
 @saveSelectionTable()
+
+if !keep_selection
+  selectObject: saveSelectionTable.table
+endif
