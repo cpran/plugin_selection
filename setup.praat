@@ -26,6 +26,7 @@ Add menu command: "Objects", "Praat", "Sort selected objects...", "selection", 2
 
 # Object selection menu
 Add menu command: "Objects", "Praat", "Select one type...",       "selection", 2, "scripts/select_one_type.praat"
+Add menu command: "Objects", "Praat", "Select all of this type",  "selection", 2, "scripts/select_selected_type.praat"
 Add menu command: "Objects", "Praat", "Invert selection",         "selection", 2, "scripts/invert_selection.praat"
 Add menu command: "Objects", "Praat", "Save selection",           "selection", 2, "scripts/save_selection.praat"
 
