@@ -1,6 +1,5 @@
 include ../procedures/selection.proc
 include ../../plugin_testsimple/procedures/test_simple.proc
-jja.debug = 0
 
 @plan(18)
 

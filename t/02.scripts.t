@@ -1,6 +1,7 @@
 include ../../plugin_testsimple/procedures/test_simple.proc
 
-selection$ = preferencesDirectory$ + "/plugin_selection/scripts/"
+selection$ = preferencesDirectory$ - "con" +
+  ... "/plugin_selection/scripts/"
 
 @no_plan()
 

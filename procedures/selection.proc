@@ -20,14 +20,9 @@
 
 include ../../plugin_utils/procedures/utils.proc
 
-if !variableExists("jja.debug")
-  jja.debug = 0
+if !variableExists("selection.restore_nocheck")
+  selection.restore_nocheck = 1
 endif
-if !variableExists("jja.restore_nocheck")
-  jja.restore_nocheck = 1
-endif
-jja.tab$ = ""
-jja.tabchar$ = ""
 
 ##
 ## Procedures
@@ -47,21 +42,12 @@ jja.tabchar$ = ""
 # @restoreSelection(), then prefer @saveSelectionTable().
 #
 procedure saveSelection ()
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "saveSelection()"
-  endif
-
   .n = numberOfSelected()
   for .i to .n
     .id[.i] = selected(.i)
   endfor
 
   @restoreSelection()
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Restores the last selection saved by @saveSelection()
@@ -70,15 +56,10 @@ endproc
 # variables of @saveSelection.
 #
 procedure restoreSelection ()
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "restoreSelection()"
-  endif
-
   if variableExists("saveSelection.n")
     @clearSelection()
     for .i to saveSelection.n
-      if jja.restore_nocheck
+      if selection.restore_nocheck
         nocheck plusObject: saveSelection.id[.i]
       else
         plusObject: saveSelection.id[.i]
@@ -86,9 +67,6 @@ procedure restoreSelection ()
     endfor
   else
     exitScript: "No selection saved"
-  endif
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
   endif
 endproc
 
@@ -123,11 +101,6 @@ endproc
 # the selection of all Sound objects in the object list.
 #
 procedure saveSelectionTable ()
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "saveSelectionTable()"
-  endif
-
   .n = numberOfSelected()
   for .i to .n
     .id[.i] = selected(.i)
@@ -141,17 +114,9 @@ procedure saveSelectionTable ()
   endfor
 
   @restoreSavedSelection(.table)
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 procedure saveTypeSelection (.type$)
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "saveSelection()"
-  endif
-
   @saveSelectionTable()
   .selected = saveSelectionTable.table
 
@@ -166,10 +131,6 @@ procedure saveTypeSelection (.type$)
 
   @restoreSavedSelection(.selected)
   removeObject: .selected
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Restores a selection using a selection table
@@ -179,11 +140,6 @@ endproc
 # selection saved in that table.
 #
 procedure restoreSavedSelection (.id)
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "restoreSavedSelection (", .id, ")"
-  endif
-
   @_IsSelectionTable(.id)
   if '_IsSelectionTable.return'
     selectObject: .id
@@ -194,7 +150,7 @@ procedure restoreSavedSelection (.id)
     endfor
 
     for .i to .n
-      if jja.restore_nocheck
+      if selection.restore_nocheck
         nocheck plusObject: .id[.i]
       else
         plusObject: .id[.i]
@@ -205,9 +161,6 @@ procedure restoreSavedSelection (.id)
   else
     exitScript: "Object ", .id, " is not a selection table"
   endif
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Adds an object to an existing selection table
@@ -217,11 +170,6 @@ endproc
 # procedure does nothing.
 #
 procedure addToSelectionTable (.table, .id)
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "addToSelectionTable(", .table, ", ", .id, ")"
-  endif
-
   @_IsSelectionTable(.table)
   @_ObjectExists(.id)
   if '_IsSelectionTable.return' and '_ObjectExists.return'
@@ -237,10 +185,6 @@ procedure addToSelectionTable (.table, .id)
     @restoreSavedSelection(.selected)
     removeObject: .selected
   endif
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Adds an object to an existing selection table
@@ -250,11 +194,6 @@ endproc
 # procedure does nothing.
 #
 procedure removeFromSelectionTable (.table, .id)
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "removeFromSelectionTable(", .table, ", ", .id, ")"
-  endif
-
   @_IsSelectionTable(.table)
   if '_IsSelectionTable.return'
     @saveSelectionTable()
@@ -265,20 +204,11 @@ procedure removeFromSelectionTable (.table, .id)
     @restoreSavedSelection(.selected)
     removeObject: .selected
   endif
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Adds the selection in a selection table to the current selection
 #
 procedure plusSavedSelection (.table)
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "plusSavedSelection(", .table, ")"
-  endif
-
   @_IsSelectionTable(.table)
   if '_IsSelectionTable.return'
     @saveSelectionTable()
@@ -288,20 +218,11 @@ procedure plusSavedSelection (.table)
     @restoreSavedSelection(.merged)
     removeObject: .current, .merged
   endif
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Removes the selection in a selection table from the current selection
 #
 procedure minusSavedSelection (.table)
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "minusSavedSelection(", .table, ")"
-  endif
-
   @_IsSelectionTable(.table)
   if '_IsSelectionTable.return'
     @saveSelectionTable()
@@ -317,25 +238,12 @@ procedure minusSavedSelection (.table)
 
     removeObject: .selected
   endif
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Safely and silently clears the selection
 #
 procedure clearSelection ()
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "clearSelection()"
-  endif
-
   nocheck selectObject(undefined)
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Create an empty selection table
@@ -348,16 +256,8 @@ endproc
 # This procedure relies internally on @createSelectionTable()
 #
 procedure createEmptySelectionTable ()
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "createEmptySelectionTable()"
-  endif
-
   @createSelectionTable(0)
   .table = createSelectionTable.table
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Create a selection table
@@ -367,33 +267,16 @@ endproc
 # for procedurally generating new collections of objects.
 #
 procedure createSelectionTable (.n)
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "createSelectionTable(", .n, ")"
-  endif
-
   .table = Create Table with column names: "selection_table", .n, "type name n id"
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Get the id of an object in a selection table
 #
 procedure getId (.table, .i)
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "getId(", .table, ", ", .i, ")"
-  endif
-
   @_IsSelectionTable(.table)
   .id = if .i and '_IsSelectionTable.return' and
       ... .i <= Object_'.table'.nrow then
     ... Object_'.table'[.i, "id"] else undefined fi
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Selects all existing selection tables
@@ -402,11 +285,6 @@ endproc
 # tables, which makes it easy to remove them.
 #
 procedure selectSelectionTables ()
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "selectSelectionTables()"
-  endif
-
   select all
   .t = 0
   .n = numberOfSelected()
@@ -427,9 +305,6 @@ procedure selectSelectionTables ()
       plusObject(.tables[.i])
     endfor
   endif
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 ## Object-type tables
@@ -442,11 +317,6 @@ endproc
 # TextGrids).
 #
 procedure checkSelection ()
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "checkSelection()"
-  endif
-
   .n = numberOfSelected()
 
   if .n
@@ -465,10 +335,6 @@ procedure checkSelection ()
   else
     .return = -1
   endif
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Generate a table with information about the current selection
@@ -479,11 +345,6 @@ endproc
 # TextGrids).
 #
 procedure checkSelectionTable (.id)
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "checkSelectionTable(", .id, ")"
-  endif
-
   @_IsSelectionTable(.id)
   if '_IsSelectionTable.return'
 
@@ -499,10 +360,6 @@ procedure checkSelectionTable (.id)
     removeObject: .selected
 
   endif
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Selects all existing object tables
@@ -510,11 +367,6 @@ endproc
 # This procedure will select all existing tables that look like object tables.
 #
 procedure selectObjectTables ()
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "selectObjectTables()"
-  endif
-
   @selectType("Table")
   .n = numberOfSelected()
   for .i to .n
@@ -526,10 +378,6 @@ procedure selectObjectTables ()
       minusObject(.o[.i])
     endif
   endfor
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Counts the type of objects from an object table
@@ -537,11 +385,6 @@ endproc
 # Provide the id of the object table and the name of the object type to count
 #
 procedure countObjects (.id, .type$)
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "countObjects(", .id, ", ", .type$, ")"
-  endif
-
   @saveSelectionTable()
   .selected = saveSelectionTable.table
 
@@ -556,10 +399,6 @@ procedure countObjects (.id, .type$)
 
   @restoreSavedSelection(.selected)
   removeObject: .selected
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 ## Selection procedures
@@ -572,17 +411,8 @@ procedure selectType (.types$)
 endproc
 
 procedure selectTypes (.types$)
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "selectType(", .types$, ")"
-  endif
-
   select all
   @refineToType(.types$)
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Selects only one type from the active selection
@@ -593,11 +423,6 @@ procedure refineToType (.types$)
 endproc
 
 procedure refineToTypes (.types$)
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "refineToType(", .types$, ")"
-  endif
-
   @saveSelectionTable()
   .selection = saveSelectionTable.table
 
@@ -635,10 +460,6 @@ procedure refineToTypes (.types$)
     @restoreSavedSelection(.objects)
     removeObject: .objects, .selection
   endif
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Deselect multiple types
@@ -670,11 +491,6 @@ endproc
 # behaviours that may change in the future.
 #
 procedure _AppendToSelectionTable (.table, .id)
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "_AppendToSelectionTable(", .table, ", ", .id, ")"
-  endif
-
   selectObject: .id
   .type$ = extractWord$(selected$(), "")
   .name$ = extractWord$(selected$(), .type$)
@@ -686,10 +502,6 @@ procedure _AppendToSelectionTable (.table, .id)
   Set string value:  .r, "name", .name$
   Set numeric value: .r, "n",    1
   Set numeric value: .r, "id",   .id
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Internal procedure to remove objects from selection tables
@@ -702,20 +514,11 @@ endproc
 # behaviours that may change in the future.
 #
 procedure _RemoveFromSelectionTable (.table, .id)
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "_RemoveFromSelectionTable(", .table, ", ", .id, ")"
-  endif
-
   selectObject: .table
   .row = Search column: "id", string$(.id)
 
   if .row
     Remove row: .row
-  endif
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
   endif
 endproc
 
@@ -726,11 +529,6 @@ endproc
 # behaviours that may change in the future.
 #
 procedure _IsSelectionTable (.table)
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "_IsSelectionTable(", .table, ")"
-  endif
-
   .return = 0
 
   # Hack to restore selection avoiding procedure-call loop
@@ -759,10 +557,6 @@ procedure _IsSelectionTable (.table)
   for .i to .n
     plusObject: .id[.i]
   endfor
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Internal procedure to check if the object with a specific id is
@@ -772,11 +566,6 @@ endproc
 # behaviours that may change in the future.
 #
 procedure _IsObjectTypeTable (.id)
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "_IsObjectTypeTable(", .id, ")"
-  endif
-
   .return = 0
   @saveSelectionTable()
   .selected = saveSelectionTable.table
@@ -793,10 +582,6 @@ procedure _IsObjectTypeTable (.id)
 
   @restoreSavedSelection(.selected)
   removeObject: .selected
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Internal procedure to check if a string represents a valid object type
@@ -805,20 +590,11 @@ endproc
 # behaviours that may change in the future.
 #
 procedure _IsValidType (.type$)
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "_IsValidType(", .type$, ")"
-  endif
-
   .objects$ = List readable types of objects
   .objects$ = replace_regex$(.objects$, ".*\t(.*)$", "\1", 0)
   .objects$ = replace$(.objects$, newline$, " ", 0)
   .objects$ = " " + .objects$ + " "
   .return = if index(.objects$, " " + .type$ + " ") then 1 else 0 fi
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Internal procedure to check if an object exists in the object list
@@ -827,11 +603,6 @@ endproc
 # behaviours that may change in the future.
 #
 procedure _ObjectExists (.id)
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "_ObjectExists(", .id, ")"
-  endif
-
   .start = numberOfSelected()
   nocheck plusObject: .id
   .plus = numberOfSelected()
@@ -849,10 +620,6 @@ procedure _ObjectExists (.id)
       plusObject: .id
     endif
   endif
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
 
 # Internal procedure to check if an object is currently selected
@@ -861,11 +628,6 @@ endproc
 # behaviours that may change in the future.
 #
 procedure _IsSelected (.id)
-  if jja.debug
-    jja.tab$ = jja.tab$ + jja.tabchar$
-    appendInfoLine: jja.tab$ - jja.tabchar$, "_IsSelected(", .id, ")"
-  endif
-
   .n = numberOfSelected()
   .return = 0
   for .i to .n
@@ -873,8 +635,4 @@ procedure _IsSelected (.id)
       .return = 1
     endif
   endfor
-
-  if jja.debug
-    jja.tab$ = jja.tab$ - jja.tabchar$
-  endif
 endproc
