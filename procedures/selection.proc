@@ -267,7 +267,17 @@ endproc
 # for procedurally generating new collections of objects.
 #
 procedure createSelectionTable (.n)
+  .total = numberOfSelected()
+  for .i to .total
+    obj[.i] = selected(.i)
+  endfor
+
   .table = Create Table with column names: "selection_table", .n, "type name n id"
+
+  @clearSelection()
+  for .i to .total
+    plusObject: obj[.i]
+  endfor
 endproc
 
 # Get the id of an object in a selection table
