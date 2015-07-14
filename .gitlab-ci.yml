@@ -11,7 +11,7 @@ Run tests:
   - cp -fa . ~/.praat-dir/plugin_selection
   - cp -fa ../plugin_testsimple ~/.praat-dir/plugin_testsimple
   - cp -fa ../plugin_utils ~/.praat-dir/plugin_utils
-    - # Run tests
+  - # Run tests
   - prove -v --exec "praat"
   - # Clean workspace
   - rm -rf ~/.praat-dir/plugin_utils ../plugin_utils
