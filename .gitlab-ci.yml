@@ -17,7 +17,7 @@ Run tests:
   - rm -rf ~/.praat-dir/plugin_utils ../plugin_utils
   - rm -rf ~/.praat-dir/plugin_testsimple ../plugin_testsimple
   - rm -rf ~/.praat-dir/plugin_selection
-  tags: cpran
+  tags:
+    - cpran
   except:
   - tags
-  
