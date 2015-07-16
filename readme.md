@@ -1,4 +1,4 @@
-# Selection tools
+# Selection tools [![build badge][badge]][build]
 
 The file [selection.proc][selection] defines a set of procedures to try to
 make it easier to manage the selection of objects in Praat. It is an attempt at
@@ -48,3 +48,6 @@ for more detailed information on how to use these procedures.
 ## Requirements:
 
 * [utils](https://gitlab.com/cpran/plugin_utils)
+
+[badge]: https://ci.gitlab.com/projects/2841/status.png?ref=master
+[build]: https://ci.gitlab.com/projects/2841
