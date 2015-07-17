@@ -19,10 +19,10 @@
 # runScript: "run_tests.praat"
 
 # Base menu
-Add menu command: "Objects", "Praat", "selection", "CPrAN", 1, ""
+nocheck Add menu command: "Objects", "Praat", "selection", "CPrAN", 1, ""
 
-Add menu command: "Objects", "Praat", "Copy selected objects...", "selection", 2, "scripts/copy_selected.praat"
-Add menu command: "Objects", "Praat", "Sort selected objects...", "selection", 2, "scripts/sort_objects.praat"
+nocheck Add menu command: "Objects", "Praat", "Copy selected objects...", "selection", 2, "scripts/copy_selected.praat"
+nocheck Add menu command: "Objects", "Praat", "Sort selected objects...", "selection", 2, "scripts/sort_objects.praat"
 
 # Object selection menu
 Add menu command: "Objects", "Praat", "Select one type...",       "selection", 2, "scripts/select_one_type.praat"
