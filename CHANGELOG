@@ -1,0 +1,26 @@
+- v0.0.9:
+  - Added this changelog
+  - Added more simple management procedures: minusSelection, plusSelection, ...
+  - Simplified ...toTypes procedures
+  - Added plusTypes
+  - Improved licensing information
+- v0.0.8:
+  - Setup script uses nocheck
+  - Added continuous integration
+- v0.0.7:
+  - Better selection protection
+  - Added testsimple as requirement
+- v0.0.6:
+  - Added automated tests
+  - Improved normalisation of preferences directory
+- v0.0.5:
+  - Added Select selected type... command
+- v0.0.4:
+  - Mnor fixes in documentation
+- v0.0.3:
+  - Minor bug fixes
+  - Changes to descriptor
+- v0.0.2:
+  - Changes in plugin descriptor
+- v0.0.1:
+  - First working version
