@@ -67,11 +67,41 @@ endproc
 procedure restoreSelection ()
   if variableExists("saveSelection.n")
     @clearSelection()
+    @plusSelection()
+  else
+    exitScript: "No selection saved"
+  endif
+endproc
+
+# Adds the last selection saved by @saveSelection() to the current selection
+#
+# Similar to calling @restoreSelection(), but the selection is not cleared
+# first.
+#
+procedure plusSelection ()
+  if variableExists("saveSelection.n")
     for .i to saveSelection.n
       if selection.restore_nocheck
         nocheck plusObject: saveSelection.id[.i]
       else
         plusObject: saveSelection.id[.i]
+      endif
+    endfor
+  else
+    exitScript: "No selection saved"
+  endif
+endproc
+
+# Removes objects in the last selection saved by @saveSelection() from the
+# current selection
+#
+procedure minusSelection ()
+  if variableExists("saveSelection.n")
+    for .i to saveSelection.n
+      if selection.restore_nocheck
+        nocheck minusObject: saveSelection.id[.i]
+      else
+        minusObject: saveSelection.id[.i]
       endif
     endfor
   else
@@ -431,7 +461,7 @@ endproc
 
 procedure selectTypes (.types$)
   select all
-  @refineToType(.types$)
+  @refineToTypes(.types$)
 endproc
 
 # Selects only one type from the active selection
@@ -481,8 +511,26 @@ procedure refineToTypes (.types$)
   endif
 endproc
 
+# Adds multiple types
+procedure plusTypes (.types$)
+  @saveSelectionTable()
+  .selection = saveSelectionTable.table
+
+  select all
+  @refineToTypes(.types$)
+
+  @plusSavedSelection(.selection)
+  removeObject: .selection
+endproc
+
 # Deselect multiple types
 procedure deselectTypes (.types$)
+  # For backwards compatibility
+  @minusTypes(.types$)
+endproc
+
+# Deselect multiple types
+procedure minusTypes (.types$)
   @saveSelectionTable()
   .selection = saveSelectionTable.table
 
