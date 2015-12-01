@@ -19,20 +19,11 @@
 #
 # Copyright 2015 Jose Joaquin Atria
 
-include ../procedures/selection.proc
-
 form Select one type...
   word Type Sound
   boolean Refine_current_selection yes
 endform
 
-@_IsValidType(type$)
-if '_IsValidType.return'
-  if refine_current_selection
-    @refineToType(type$)
-  else
-    @selectType(type$)
-  endif
-else
-  exit 'type$' is not a readable object type
-endif
+appendInfoLine: "W: ""select_one_type"" is deprecated. Use ""select_types"" instead"
+
+runScript: "select_types.praat", type$, refine_current_selection

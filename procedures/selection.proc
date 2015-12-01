@@ -456,6 +456,7 @@ endproc
 #
 procedure selectType (.types$)
   # For backwards compatibility
+  appendInfoLine: "W: ""selectType"" is deprecated. Use ""selectTypes"" instead"
   @selectTypes(.types$)
 endproc
 
@@ -468,6 +469,7 @@ endproc
 #
 procedure refineToType (.types$)
   # For backwards compatibility
+  appendInfoLine: "W: ""refineToType"" is deprecated. Use ""refineToTypes"" instead"
   @refineToTypes(.types$)
 endproc
 
@@ -526,6 +528,7 @@ endproc
 # Deselect multiple types
 procedure deselectTypes (.types$)
   # For backwards compatibility
+  appendInfoLine: "W: ""deselectTypes"" is deprecated. Use ""minusTypes"" instead"
   @minusTypes(.types$)
 endproc
 

@@ -19,6 +19,15 @@
 #
 # Copyright 2014, 2015 Jose Joaquin Atria
 
-appendInfoLine: "W: ""select_selected_type"" is deprecated. Use ""select_selected_types"" instead"
+include ../../plugin_selection/procedures/selection.proc
 
-runScript: "select_selected_types.praat"
+@checkSelection()
+objects = checkSelection.table
+types$ = ""
+for i to Object_'objects'.nrow
+  types$ = types$ + Object_'objects'$[i, "type"] + " "
+endfor
+
+runScript: "select_types.praat", types$, "no"
+
+removeObject: objects
