@@ -82,14 +82,14 @@ textgrids = saveSelectionTable.table
  ... "plus saved selections"
 
 ## Refine selection to specified type
-@refineToType("Sound")
+@refineToTypes("Sound")
 @ok: numberOfSelected("TextGrid")  == 0 and
  ... numberOfSelected("Sound")     == 5 and
  ... numberOfSelected()            == 5,
  ... "refine to type"
 
 ## Select all objects of given type
-@selectType("TextGrid")
+@selectTypes("TextGrid")
 @ok: numberOfSelected("TextGrid")  == 5 and
  ... numberOfSelected("Sound")     == 0 and
  ... numberOfSelected()            == 5,
@@ -112,7 +112,7 @@ objects = checkSelectionTable.table
 
 # Deselect multiple object types
 @restoreSavedSelection(all)
-@deselectTypes("Sound TextGrid")
+@minusTypes("Sound TextGrid")
 @ok: numberOfSelected("TextGrid")  == 0 and
  ... numberOfSelected("Sound")     == 0 and
  ... numberOfSelected()            == 0,

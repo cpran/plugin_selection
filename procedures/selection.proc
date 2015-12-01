@@ -125,13 +125,13 @@ endproc
 #     pitchs = Extract rows where column (text): "type", "is equal to", "Pitch"
 #
 # Although this is probably done more quickly by using the
-# @selectType(type$) or @refineToType(type$) procedures
+# @selectTypes(types$) or @refineToTypes(types$) procedures
 # depending on whether the entire object list or only the
 # current selection should be considered (note that the example below
 # does not alter the current selection):
 #
 #     @saveSelection()
-#     @selectType("Sound")
+#     @selectTypes("Sound")
 #     @saveSelectionTable()
 #     sounds = saveSelectionTable.table
 #     @restoreSelection()
@@ -161,7 +161,7 @@ procedure saveTypeSelection (.type$)
 
   @_IsValidType(.type$)
   if '_IsValidType.return'
-    @refineToType(.type$)
+    @refineToTypes(.type$)
     @saveSelectionTable()
     .table = saveSelectionTable.table
     selectObject: saveSelectionTable.table
@@ -416,7 +416,7 @@ endproc
 # This procedure will select all existing tables that look like object tables.
 #
 procedure selectObjectTables ()
-  @selectType("Table")
+  @selectTypes("Table")
   .n = numberOfSelected()
   for .i to .n
     .o[.i] = selected(.i)
