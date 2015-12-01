@@ -1,7 +1,9 @@
 include ../../plugin_testsimple/procedures/test_simple.proc
+include ../../plugin_utils/procedures/utils.proc
 
-selection$ = preferencesDirectory$ - "con" +
-  ... "/plugin_selection/scripts/"
+@normalPrefDir()
+
+selection$ = preferencesDirectory$ + "/plugin_selection/scripts/"
 
 @no_plan()
 
@@ -17,7 +19,7 @@ for i to 5
 endfor
 
 runScript: selection$ + "save_selection.praat"
-@ok_formula: "numberOfSelected(""Table"")",
+@ok: numberOfSelected("Table"),
   ... "save selection creates table"
 
 if !numberOfSelected("Table")
@@ -31,7 +33,7 @@ before_copying = numberOfSelected()
 
 selectObject: sounds
 runScript: selection$ + "restore_selection.praat"
-@ok_formula: "numberOfSelected(""Sound"") = 5",
+@ok: numberOfSelected("Sound") == 5,
   ... "restored selection from table"
 
 runScript: selection$ + "copy_selected.praat"
@@ -42,33 +44,33 @@ select all
 minusObject: copied
 after_copying = numberOfSelected()
 
-@ok_formula: "after_copying - before_copying = 5",
+@ok: after_copying - before_copying == 5,
   ... "copied 5 objects"
 
 nocheck selectObject: undefined
-runScript: selection$ + "select_one_type.praat", "Sound", "no"
-@ok_formula: "numberOfSelected(""Sound"") = 10",
+runScript: selection$ + "select_types.praat", "Sound", "no"
+@ok: numberOfSelected("Sound") == 10,
   ... "selected all Sound objects"
 
 select all
 minusObject: sound[1]
-runScript: selection$ + "select_one_type.praat", "Sound", "yes"
-@ok_formula: "numberOfSelected(""Sound"") = 9",
+runScript: selection$ + "select_types.praat", "Sound", "yes"
+@ok: numberOfSelected("Sound") == 9,
   ... "refined selection to Sound"
 
 selectObject: sound[1]
-runScript: selection$ + "select_selected_type.praat"
-@ok_formula: "numberOfSelected(""Sound"") = 10",
+runScript: selection$ + "select_selected_types.praat"
+@ok: numberOfSelected("Sound") == 10,
   ... "selected all objects of selected type"
 
 minusObject: sound[1]
 runScript: selection$ + "invert_selection.praat"
-@ok_formula: "numberOfSelected(""Sound"") = 1",
+@ok: numberOfSelected("Sound") == 1,
   ... "inverted selection"
 
 selectObject: sounds, copied
 runScript: selection$ + "restore_selection.praat"
-@ok_formula: "numberOfSelected(""Sound"") = 10",
+@ok: numberOfSelected("Sound") == 10,
   ... "restored multiple selection tables"
 Remove
 
@@ -76,6 +78,6 @@ removeObject: sounds, copied
 
 ## Make sure no objects are left behind
 select all
-@ok_formula: "numberOfSelected() = baseline", "ensure clean up"
+@ok: numberOfSelected() == baseline, "ensure clean up"
 
 @done_testing()

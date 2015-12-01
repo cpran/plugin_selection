@@ -1,7 +1,7 @@
 include ../procedures/selection.proc
 include ../../plugin_testsimple/procedures/test_simple.proc
 
-@plan(18)
+@plan(23)
 
 select all
 baseline = numberOfSelected()
@@ -16,16 +16,37 @@ endfor
 
 ## Clear selection
 @clearSelection()
-@ok_formula: "numberOfSelected(""Sound"") = 0", "clear selection"
+@ok: numberOfSelected("Sound") == 0, "clear selection"
 
 ## Save Sound selection
 for i from 1 to 5
   plusObject: sound[i]
 endfor
 
+# Simple save selection
+pre = numberOfSelected("Sound")
+@saveSelection()
+post = numberOfSelected("Sound")
+@ok: pre == post, "simple save selection does not change selection"
+
+@clearSelection()
+
+# Simple restore selection
+@restoreSelection()
+post = numberOfSelected("Sound")
+@ok: numberOfSelected("Sound") == 5, "simple restore selection"
+
+# Simple minus selection
+@minusSelection()
+@ok: numberOfSelected("Sound") == 0, "simple minus selection"
+
+# Simple plus selection
+@plusSelection()
+@ok: numberOfSelected("Sound") == 5, "simple plus selection from blank"
+
 @saveSelectionTable()
 sounds = saveSelectionTable.table
-@ok_formula: "numberOfSelected(""Sound"") = 5", "save selection table"
+@ok: numberOfSelected("Sound") == 5, "save selection table"
 
 ## Create TextGrids
 To TextGrid: "tier", ""
@@ -33,40 +54,46 @@ To TextGrid: "tier", ""
 ## Save TextGrid selection
 @saveSelectionTable()
 textgrids = saveSelectionTable.table
-@ok_formula: "numberOfSelected(""TextGrid"") = 5", "save selection table twice"
+@ok: numberOfSelected("TextGrid") == 5, "save selection table twice"
+
+@plusSelection()
+@ok:  numberOfSelected("TextGrid") ==  5 and
+  ... numberOfSelected("Sound")    ==  5 and
+  ... numberOfSelected()           == 10,
+    ... "simple plus selection from existing selection"
 
 ## Swap between saved selections
 @restoreSavedSelection(sounds)
-@ok: if numberOfSelected("TextGrid") =  0 and
-    ... numberOfSelected("Sound")    =  5 and
-    ... numberOfSelected()           =  5 then 1 else 0 fi,
-    ... "restore saved selection"
+@ok: numberOfSelected("TextGrid")  ==  0 and
+ ... numberOfSelected("Sound")     ==  5 and
+ ... numberOfSelected()            ==  5,
+ ... "restore saved selection"
 
 ## De-select saved selection
 @minusSavedSelection(sounds)
-@ok_formula: "numberOfSelected() = 0", "minus saved selection" 
+@ok: numberOfSelected() == 0, "minus saved selection"
 
 ## Add saved selection to current selection
 @plusSavedSelection(sounds)
 @plusSavedSelection(textgrids)
-@ok: if numberOfSelected("TextGrid") =  5 and
-    ... numberOfSelected("Sound")    =  5 and
-    ... numberOfSelected()           = 10 then 1 else 0 fi,
-    ... "plus saved selections"
+@ok: numberOfSelected("TextGrid")  ==  5 and
+ ... numberOfSelected("Sound")     ==  5 and
+ ... numberOfSelected()            == 10,
+ ... "plus saved selections"
 
 ## Refine selection to specified type
 @refineToType("Sound")
-@ok: if numberOfSelected("TextGrid") = 0 and
-    ... numberOfSelected("Sound")    = 5 and
-    ... numberOfSelected()           = 5 then 1 else 0 fi,
-    ... "refine to type"
+@ok: numberOfSelected("TextGrid")  == 0 and
+ ... numberOfSelected("Sound")     == 5 and
+ ... numberOfSelected()            == 5,
+ ... "refine to type"
 
 ## Select all objects of given type
 @selectType("TextGrid")
-@ok: if numberOfSelected("TextGrid") = 5 and
-    ... numberOfSelected("Sound")    = 0 and
-    ... numberOfSelected()           = 5 then 1 else 0 fi,
-    ... "select type"
+@ok: numberOfSelected("TextGrid")  == 5 and
+ ... numberOfSelected("Sound")     == 0 and
+ ... numberOfSelected()            == 5,
+ ... "select type"
 
 ## Add saved selections together
 selectObject: sounds,textgrids
@@ -79,55 +106,55 @@ objects = checkSelectionTable.table
 
 ## Count object types
 @countObjects(objects, "Sound")
-@ok_formula: "countObjects.n = 5", "count existing objects"
+@ok: countObjects.n == 5, "count existing objects"
 @countObjects(objects, "Pitch")
-@ok_formula: "countObjects.n = 0", "count non-existing objects"
+@ok: countObjects.n == 0, "count non-existing objects"
 
 # Deselect multiple object types
 @restoreSavedSelection(all)
 @deselectTypes("Sound TextGrid")
-@ok: if numberOfSelected("TextGrid") = 0 and
-    ... numberOfSelected("Sound")    = 0 and
-    ... numberOfSelected()           = 0 then 1 else 0 fi,
-    ... "deselect multiple types"
+@ok: numberOfSelected("TextGrid")  == 0 and
+ ... numberOfSelected("Sound")     == 0 and
+ ... numberOfSelected()            == 0,
+ ... "deselect multiple types"
 
 # Refine selection to multiple object types
 @restoreSavedSelection(all)
 @refineToTypes("Sound TextGrid")
-@ok: if numberOfSelected("TextGrid") =  5 and
-    ... numberOfSelected("Sound")    =  5 and
-    ... numberOfSelected("Pitch")    =  0 and
-    ... numberOfSelected()           = 10 then 1 else 0 fi,
-    ... "refine to multiple types"
+@ok: numberOfSelected("TextGrid")  ==  5 and
+ ... numberOfSelected("Sound")     ==  5 and
+ ... numberOfSelected("Pitch")     ==  0 and
+ ... numberOfSelected()            == 10,
+ ... "refine to multiple types"
 
 # Select only certain types
 @clearSelection()
 @selectTypes("Sound TextGrid")
-@ok: if numberOfSelected("TextGrid") =  5 and
-    ... numberOfSelected("Sound")    =  5 and
-    ... numberOfSelected("Pitch")    =  0 and
-    ... numberOfSelected()           = 10 then 1 else 0 fi,
-    ... "select multiple types"
+@ok: numberOfSelected("TextGrid")  ==  5 and
+ ... numberOfSelected("Sound")     ==  5 and
+ ... numberOfSelected("Pitch")     ==  0 and
+ ... numberOfSelected()            == 10,
+ ... "select multiple types"
 
 @restoreSavedSelection(all)
-@ok: if numberOfSelected("TextGrid") =  5 and
-    ... numberOfSelected("Sound")    =  5 and
-    ... numberOfSelected()           = 10 then 1 else 0 fi,
-    ... "restore all objects"
+@ok: numberOfSelected("TextGrid")  ==  5 and
+ ... numberOfSelected("Sound")     ==  5 and
+ ... numberOfSelected()            == 10,
+ ... "restore all objects"
 Remove
 
 ## Remove all selection tables
 @selectSelectionTables()
-@ok_formula: "numberOfSelected(""Table"") = 3", "select selection tables"
+@ok: numberOfSelected("Table") == 3, "select selection tables"
 Remove
 
 ## Remove all object tables
 @selectObjectTables()
-@ok_formula: "numberOfSelected(""Table"") = 1", "select object tables"
+@ok: numberOfSelected("Table") == 1, "select object tables"
 Remove
 
 ## Make sure no objects are left behind
 select all
-@ok_formula: "numberOfSelected() = baseline", "ensure clean up"
+@ok: numberOfSelected() == baseline, "ensure clean up"
 
 @done_testing()
