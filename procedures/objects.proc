@@ -1,0 +1,168 @@
+include ../../plugin_selection/procedures/tables.proc
+
+## Object-type tables
+
+#! ### `checkSelection` {#check-selection}
+#!
+#! ~~~ params
+#! out:
+#!   - .return: >
+#!     `1` if the current selection has the same number of each
+#!     object type, `0` if selected object types are unbalanced.
+#!     `-1` if the procedure is called with an empty selection.
+#! ~~~
+#!
+#! Generate a table with information about the current selection
+#! (an "object table").
+#!
+#! This procedure generates a table with the types of objects selected and the
+#! number of selected objects per type. This can then be used to check for
+#! parity between multiple object types (for instance, for pairing Sounds and
+#! TextGrids).
+#!
+procedure checkSelection ()
+  .n = numberOfSelected()
+
+  if .n
+    @saveSelectionTable()
+    .selected = saveSelectionTable.table
+
+    selectObject: .selected
+    .table = Collapse rows: "type", "n", "", "", "", ""
+    Rename: "object_table"
+
+    .variance = Get standard deviation: "n"
+    .return = if !.variance then 1 else 0 fi
+
+    @restoreSavedSelection(.selected)
+    removeObject: .selected
+  else
+    .return = -1
+  endif
+endproc
+
+#! ### `checkSelectionTable` {#check-selection-table}
+#!
+#! ~~~ params
+#! in:
+#!   - .id: The ID of a selection table
+#! out:
+#!   - .return: >
+#!     `1` if the selection table has the same number of each
+#!     object type, `0` if object types are unbalanced.
+#!     `-1` if the selection table is empty.
+#! ~~~
+#!
+#! Generate a table with information about the selection stored in
+#! the specified selection table. Calling This procedure is the same
+#! as restoring the selection table and calling
+#! [`checkSelection`](#check-selection), although this procedure does
+#! not change the active selection in doing so.
+#!
+procedure checkSelectionTable (.id)
+  @_IsSelectionTable(.id)
+  if '_IsSelectionTable.return'
+
+    @saveSelectionTable()
+    .selected = saveSelectionTable.table
+
+    @restoreSavedSelection(.id)
+    @checkSelection()
+    .table = checkSelection.table
+    .return = checkSelection.return
+
+    @restoreSavedSelection(.selected)
+    removeObject: .selected
+
+  endif
+endproc
+
+#! ### `selectObjectTables` {#select-object-tables}
+#!
+#! ~~~ params
+#! out:
+#!   - .n: The number of selected tables
+#! selection:
+#!   out: true
+#! ~~~
+#!
+#! Selects all existing tables that look like object tables.
+#!
+procedure selectObjectTables ()
+  @selectTypes("Table")
+  .n = numberOfSelected()
+  for .i to .n
+    .o[.i] = selected(.i)
+  endfor
+  for .i to .n
+    @_IsObjectTypeTable(.o[.i])
+    if !'_IsObjectTypeTable.return'
+      minusObject(.o[.i])
+    endif
+  endfor
+  .n = numberOfSelected()
+endproc
+
+#! ### `countObjects` {#count-objects}
+#!
+#! ~~~ params
+#! in:
+#!   - .id:    The ID of an object table
+#!   - .type$: The name of a valid Praat object type
+#! out:
+#!   - .n: The number of objects of the specified type in the object table
+#! ~~~
+#!
+#! Counts the number of objects of a given type in an object table.
+#!
+procedure countObjects (.id, .type$)
+  @saveSelectionTable()
+  .selected = saveSelectionTable.table
+
+  @_IsObjectTypeTable(.id)
+  if '_IsObjectTypeTable.return'
+    selectObject: .id
+    .row = nowarn Search column: "type", .type$
+    .n = if .row then Object_'.id'[.row, "n"] else 0 fi
+  else
+    exitScript: "Not an object-type table: ", .id
+  endif
+
+  @restoreSavedSelection(.selected)
+  removeObject: .selected
+endproc
+
+#! ### `_IsObjectTypeTable`
+#!
+#! ~~~ params
+#! in:
+#!   - .id: The ID of an object to test
+#! out:
+#!   - .return: `1` if the object looks like an object table, `0` otherwise.
+#! internal: true
+#! ~~~
+#!
+#! Internal procedure to check if the object with a specific id is
+#! (or looks like) a valid object-type table.
+#!
+#! Internal procedures have no checks, may modify the selection, and have
+#! behaviours that may change in the future.
+#!
+procedure _IsObjectTypeTable (.id)
+  .return = 0
+  @saveSelectionTable()
+  .selected = saveSelectionTable.table
+
+  @_ObjectExists(.id)
+  if '_ObjectExists.return'
+    selectObject: .id
+    .columns$ = List: 0
+    .columns$ = left$(.columns$, index(.columns$, newline$) - 1)
+    if .columns$ = "type" + tab$ + "n"
+      .return = 1
+    endif
+  endif
+
+  @restoreSavedSelection(.selected)
+  removeObject: .selected
+endproc

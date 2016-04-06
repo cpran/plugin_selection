@@ -1,0 +1,826 @@
+#! ---
+#! title:  'Selection tools'
+#! author:
+#! - 'José Joaquín Atria'
+#! tags: [praat, cpran, selection]
+#! abstract: |
+#!   This is a set of procedure that make it easy to save and restore
+#!   any number of object selections, as well as perform other related
+#!   tasks (clear the selection, count types of objects, etc).
+#!
+#!   This script is part of the selection CPrAN plugin for Praat.
+#! ---
+#!
+#! A large number of the commands available in Praat are context-dependent,
+#! in the sense that their availability depends both on the type and
+#! sometimes number of objects that are selected at any one time.
+#!
+#! However, despite selections being so important for the Praat workflow,
+#! there are few features geared specifically to complex selection
+#! management. The “selection” plugin aims to fill that void by providing
+#! a number of procedures to manipulate selections, and a set of scripts
+#! that encapsulate some of the more common use cases, and showcase some
+#! possible applications of the plugin.
+#!
+#! ## Overview
+#!
+#! Praat does not allow for the creation of custom object types, so
+#! selections for this plugin are represented using Table objects. Each
+#! of these selection tables holds information about a set of selected
+#! objects, including their names, types, and id numbers.
+#!
+#! A selection table is nothing but a Table containing the following
+#! columns:
+#!
+#! type
+#!
+#!   : The type of a given object as a string
+#!
+#! name
+#!
+#!   : The name of a given object as a string
+#!
+#! n
+#!
+#!   : A placeholder variable holding the value 1
+#!
+#! id
+#!
+#!   : The id number of the corresponding object
+#!
+#! Any Table object with _at least_ those columns can be considered a
+#! selection table, and can be processed with this plugin.
+#!
+#! ## License
+#!
+#! This script is part of the selection CPrAN plugin for Praat.
+#! The latest version is available through CPrAN or at
+#! <http://cpran.net/plugins/selection>
+#!
+#! The selection plugin is free software: you can redistribute it
+#! and/or modify it under the terms of the GNU General Public
+#! License as published by the Free Software Foundation, either
+#! version 3 of the License, or (at your option) any later version.
+#!
+#! The selection plugin is distributed in the hope that it will be
+#! useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+#! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#! GNU General Public License for more details.
+#!
+#! You should have received a copy of the GNU General Public License
+#! along with selection. If not, see <http://www.gnu.org/licenses/>.
+#!
+#! Copyright 2014, 2015 Jose Joaquin Atria
+
+include ../../plugin_utils/procedures/utils.proc
+
+# Setting this variable to 0 makes the selection process much more
+# stringent.
+if !variableExists("selection.restore_nocheck")
+  selection.restore_nocheck = 1
+endif
+
+#!
+#! ## Procedures
+#!
+
+## Selection tables
+
+#! ### `saveSelectionTable` {#save-selection-table}
+#!
+#! ~~~ params
+#! out:
+#!   - .table: The ID of a selection table representing the saved selection
+#! ~~~
+#!
+#! Saves the active selection to a selection table.
+#!
+#! Selection tables are used by these procedures to represent
+#! a selection and store its data. This procedure is used
+#! to create a table representing the current selection.
+#!
+#! Using this table it is easy to create per-type sub-sets of the
+#! current selection, by using the `Extract rows where...`-like commands:
+#!
+#!     @saveSelectionTable()
+#!     table = saveSelectionTable.table
+#!     sounds = Extract rows where column (text):
+#!        ... "type", "is equal to", "Sound"
+#!     selectObject: table
+#!     pitchs = Extract rows where column (text):
+#!        ... "type", "is equal to", "Pitch"
+#!
+#! Although this is probably done more quickly by using the
+#! [`selectTypes()`](#select-types) or [`refineToTypes()`](#refine-to-types)
+#! procedures depending on whether the entire object list or only the
+#! current selection should be considered (note that the example below
+#! does not alter the current selection):
+#!
+#!     @saveSelection()
+#!     @selectTypes("Sound")
+#!     @saveSelectionTable()
+#!     sounds = saveSelectionTable.table
+#!     @restoreSelection()
+#!
+#! After that, the variable `sounds` holds the id of a table
+#! representing the selection of all Sound objects in the object list.
+#!
+procedure saveSelectionTable ()
+  .n = numberOfSelected()
+  for .i to .n
+    .id[.i] = selected(.i)
+  endfor
+
+  @createEmptySelectionTable()
+  .table = createEmptySelectionTable.table
+
+  for .i to .n
+    @_AppendToSelectionTable(.table, .id[.i])
+  endfor
+
+  @restoreSavedSelection(.table)
+endproc
+
+#! ### `saveTypeSelection` {#save-type-selection}
+#!
+#! ~~~ params
+#! in:
+#!   - .types$: A list of types, separated by spaces
+#! out:
+#!   - .table: >
+#!       The ID of a selection table representing the saved selection
+#!       or `undefined`, if there was a problem in the selection
+#!       refining.
+#! ~~~
+#!
+#! Saves only the specified object types in the active selection to
+#! a selection table.
+#!
+#! Calling this procedure is the same as calling
+#! [`refineToTypes()`](#refine-to-types) and
+#! [`saveSelectionTable()`](#save-selection-table), with some added
+#! failsafes.
+#!
+procedure saveTypeSelection (.types$)
+  @saveSelectionTable()
+  .selected = saveSelectionTable.table
+
+  .table = undefined
+  @refineToTypes(.types$)
+  if refineToTypes.found$ != ""
+    @saveSelectionTable()
+    .table = saveSelectionTable.table
+    selectObject: saveSelectionTable.table
+    Rename: .types$ + "_selection"
+  endif
+
+  @restoreSavedSelection(.selected)
+  removeObject: .selected
+endproc
+
+#! ### `restoreSavedSelection` {#restore-saved-selection}
+#!
+#! ~~~ params
+#! in:
+#!   - .id: The ID of the selection table to restore
+#! selection
+#!   out: true
+#! ~~~
+#!
+#! When called with the id of a previously generated selection table (by
+#! calling [`saveSelection()`](#save-selection), for example), it will
+#! restore the selection saved in that table.
+#!
+procedure restoreSavedSelection (.id)
+  @_IsSelectionTable(.id)
+  if '_IsSelectionTable.return'
+    selectObject: .id
+
+    .n = Object_'.id'.nrow
+    for .i to .n
+      .id[.i] = Object_'.id'[.i, "id"]
+    endfor
+
+    for .i to .n
+      if selection.restore_nocheck
+        nocheck plusObject: .id[.i]
+      else
+        plusObject: .id[.i]
+      endif
+    endfor
+
+    minusObject: .id
+  else
+    exitScript: "Object ", .id, " is not a selection table"
+  endif
+endproc
+
+#! ### `addToSelectionTable` {#add-to-selection-table}
+#!
+#! ~~~ params
+#! in:
+#!   - .table: The ID of the selection table to modify
+#!   - .id:    The ID of the object to add to the table
+#! ~~~
+#!
+#! Adds an object to an existing selection table.
+#!
+#! Given a valid selection table, this procedure adds the object specified
+#! by `.id` to it. This procedure is idempotent, in that if the object is
+#! already in the selection table, it does nothing.
+#!
+procedure addToSelectionTable (.table, .id)
+  @_IsSelectionTable(.table)
+  @_ObjectExists(.id)
+  if '_IsSelectionTable.return' and '_ObjectExists.return'
+    @saveSelectionTable()
+    .selected = saveSelectionTable.table
+
+    @restoreSavedSelection(.table)
+    @_IsSelected(.id)
+    if !'_IsSelected.return'
+      @_AppendToSelectionTable(.table, .id)
+    endif
+
+    @restoreSavedSelection(.selected)
+    removeObject: .selected
+  endif
+endproc
+
+#! ### `removeFromSelectionTable` {#remove-from-selection-table}
+#!
+#! ~~~ params
+#! in:
+#!   - .table: The ID of the selection table to modify
+#!   - .id:    The ID of the object to remove from the table
+#! ~~~
+#!
+#! Removes an object from an existing selection table
+#!
+#! Given a valid selection table, this procedure removes the object
+#! specified by `.id` from it. This procedure is idempotent, in that
+#! if the object is not in the selection table, it does nothing.
+#!
+procedure removeFromSelectionTable (.table, .id)
+  @_IsSelectionTable(.table)
+  if '_IsSelectionTable.return'
+    @saveSelectionTable()
+    .selected = saveSelectionTable.table
+
+    @_RemoveFromSelectionTable(.table, .id)
+
+    @restoreSavedSelection(.selected)
+    removeObject: .selected
+  endif
+endproc
+
+#! ### `plusSavedSelection` {#plus-saved-selection}
+#!
+#! ~~~ params
+#! in:
+#!   - .table: The ID of a selection table
+#! ~~~
+#!
+#! Adds the selection in the specified selection table to the current
+#! selection.
+#!
+procedure plusSavedSelection (.table)
+  @_IsSelectionTable(.table)
+  if '_IsSelectionTable.return'
+    @saveSelectionTable()
+    .current = saveSelectionTable.table
+    selectObject: .current, .table
+    .merged = Append
+    @restoreSavedSelection(.merged)
+    removeObject: .current, .merged
+  endif
+endproc
+
+#! ### `minusSavedSelection` {#minus-saved-selection}
+#!
+#! ~~~ params
+#! in:
+#!   - .table: The ID of a selection table
+#! ~~~
+#!
+#! Removes the selection in the specified selection table from the current
+#! selection.
+#!
+procedure minusSavedSelection (.table)
+  @_IsSelectionTable(.table)
+  if '_IsSelectionTable.return'
+    @saveSelectionTable()
+    .selected = saveSelectionTable.table
+
+    selectObject: .table
+    .n = Object_'.table'.nrow
+
+    @restoreSavedSelection(.selected)
+    for .i to .n
+      minusObject: Object_'.table'[.i, "id"]
+    endfor
+
+    removeObject: .selected
+  endif
+endproc
+
+#! ### `createEmptySelectionTable` {#create-empty-selecton-table}
+#!
+#! ~~~ params
+#! out:
+#!   - .table: The ID of the newly created table
+#! ~~~
+#!
+#! Creates an empty selection table.
+#!
+#! This procedure creates an empty selection table, with the proper
+#! column structure but no rows. This is useful for procedurally
+#! generating new collections of objects when the final number of objects
+#! is not known.
+#!
+#! This procedure relies internally on
+#! [`createSelectionTable()](#create-selection-table).
+#!
+procedure createEmptySelectionTable ()
+  @createSelectionTable(0)
+  .table = createSelectionTable.table
+endproc
+
+#! ### `createSelectionTable` {#create-selecton-table}
+#!
+#! ~~~ params
+#! in:
+#!   - .n: The number of rows in the created table
+#! out:
+#!   - .table: The ID of the newly created table
+#! ~~~
+#!
+#! Create a blank selection table.
+#!
+#! This procedure creates a blank selection table, with as many
+#! empty entries as indicated in its only argument. This is useful
+#! for procedurally generating new collections of objects.
+#!
+procedure createSelectionTable (.n)
+  .total = numberOfSelected()
+  for .i to .total
+    obj[.i] = selected(.i)
+  endfor
+
+  .table = Create Table with column names: "selection_table", .n, "type name n id"
+
+  @clearSelection()
+  for .i to .total
+    plusObject: obj[.i]
+  endfor
+endproc
+
+#! ### `getId` {#get-id}
+#!
+#! ~~~ params
+#! in:
+#!   -.table: The ID of a selection table
+#!   - .i:    The index of the queried object in that table
+#! out:
+#!   - .id:   The ID of the queried object
+#! ~~~
+#!
+#! Get the id of an object in a selection table
+#!
+procedure getId (.table, .i)
+  @_IsSelectionTable(.table)
+  .id = if .i and '_IsSelectionTable.return' and
+      ... .i <= Object_'.table'.nrow then
+    ... Object_'.table'[.i, "id"] else undefined fi
+endproc
+
+#! ### `selectSelectionTables` {#select-selection-tables}
+#!
+#! ~~~ params
+#! out:
+#!   - .n: The number of selected selection tables
+#! selection:
+#!   out: true
+#! ~~~
+#!
+#! Selects all existing selection tables in the object list
+#!
+#! This procedure will select all existing tables that look like selection
+#! tables, which makes it easy to remove them.
+#!
+procedure selectSelectionTables ()
+  select all
+  .t = 0
+  .n = numberOfSelected()
+  for .i to .n
+    .o[.i] = selected(.i)
+  endfor
+  for .i to .n
+    @_IsSelectionTable(.o[.i])
+    if '_IsSelectionTable.return'
+      .t += 1
+      .tables[.t] = .o[.i]
+    endif
+  endfor
+
+  if .t
+    @clearSelection()
+    for .i to .t
+      plusObject(.tables[.i])
+    endfor
+  endif
+  .t = .n
+endproc
+
+## Selection procedures
+
+#! ### `clearSelection` {#clear-selection}
+#!
+#! ~~~ params
+#! selection:
+#!   out: true
+#! ~~~
+#!
+#! Safely and silently clears the selection.
+#!
+procedure clearSelection ()
+  nocheck selectObject(undefined)
+endproc
+
+#! ### `selectType` {#select-type}
+#!
+#! ~~~ params
+#! in:
+#!   - .type$: The name of a valid Praat object type
+#! selection:
+#!   out: true
+#! deprecated: selectTypes
+#! ~~~
+#!
+#! (Deprecated) Selects only one type from the entire object list. This
+#! procedure is deprecated. Use instead [`selectTypes()`](#select-types).
+#!
+procedure selectType (.types$)
+  # For backwards compatibility
+  appendInfoLine: "W: ""selectType"" is deprecated. Use ""selectTypes"" instead"
+  @selectTypes(.types$)
+endproc
+
+#! ### `selectTypes` {#select-types}
+#!
+#! ~~~ params
+#! in:
+#!   - .types$: A list of types, separated by spaces
+#! selection:
+#!   out: true
+#! ~~~
+#!
+#! Selects all objects of the specified types in the object list.
+#!
+procedure selectTypes (.types$)
+  select all
+  @refineToTypes(.types$)
+endproc
+
+#! ### `refineToType` {#refine-to-type}
+#!
+#! ~~~ params
+#! in:
+#!   - .type$: The name of a valid Praat object type
+#! selection:
+#!   out: true
+#! deprecated: refineToTypes
+#! ~~~
+#!
+#! (Deprecated) Selects only one type from the active selection. This
+#! procedure is deprecated. Use instead [`refineToTypes()`](#refine-to-types).
+#!
+procedure refineToType (.type$)
+  # For backwards compatibility
+  appendInfoLine: "W: ""refineToType"" is deprecated. Use ""refineToTypes"" instead"
+  @refineToTypes(.type$)
+endproc
+
+#! ### `refineToTypes` {#refine-to-types}
+#!
+#! ~~~ params
+#! in:
+#!   - .types$: A list of types, separated by spaces
+#! out:
+#!   - .found$: A list of the valid types found, separated by commas.
+#! selection:
+#!   out: true
+#! ~~~
+#!
+#! Selects all objects of the specified types from the active selection.
+#!
+procedure refineToTypes (.types$)
+  @saveSelectionTable()
+  .selection = saveSelectionTable.table
+
+  if .types$ != ""
+    @split: " ", .types$
+
+    @createEmptySelectionTable()
+    .objects = createEmptySelectionTable.table
+
+    .found$ = ""
+    for .i to split.length
+      .type$ = split.return$[.i]
+      @_IsValidType(.type$)
+      if '_IsValidType.return'
+        selectObject: .selection
+        .per_type = nowarn Extract rows where column (text): "type", "is equal to", .type$
+
+        @restoreSavedSelection(.per_type)
+        @plusSavedSelection(.objects)
+
+        @saveSelectionTable()
+        removeObject: .objects
+        .objects = saveSelectionTable.table
+        removeObject: .per_type
+
+        if numberOfSelected()
+          .found$ = .found$ + .type$ + ", "
+        endif
+      else
+        exitScript: """", .type$, """ is not a valid Praat type"
+      endif
+    endfor
+    .found$ = .found$ - ", "
+
+    @restoreSavedSelection(.objects)
+    removeObject: .objects, .selection
+  endif
+endproc
+
+#! ### `plusTypes` {#plus-types}
+#!
+#! ~~~ params
+#! in:
+#!   - .types$: A list of types, separated by spaces
+#! selection:
+#!   out: true
+#! ~~~
+#!
+#! Adds all objects of the specified types in the object list to the
+#! current selection.
+#!
+procedure plusTypes (.types$)
+  @saveSelectionTable()
+  .selection = saveSelectionTable.table
+
+  select all
+  @refineToTypes(.types$)
+
+  @plusSavedSelection(.selection)
+  removeObject: .selection
+endproc
+
+#! ### `deselectTypes` {#deselect-types}
+#!
+#! ~~~ params
+#! in:
+#!   - .types$: A list of types, separated by spaces
+#! selection:
+#!   out: true
+#! deprecated: minusTypes
+#! ~~~
+#!
+#! (Deprecated) Removes objects of the specified types from the active
+#! selection. This procedure is deprecated. Use instead
+#! [`minusTypes()`](#minus-types).
+#!
+procedure deselectTypes (.types$)
+  # For backwards compatibility
+  appendInfoLine: "W: ""deselectTypes"" is deprecated. Use ""minusTypes"" instead"
+  @minusTypes(.types$)
+endproc
+
+#! ### `minusTypes` {#minus-types}
+#!
+#! ~~~ params
+#! in:
+#!   - .types$: A list of types, separated by spaces
+#! selection:
+#!   out: true
+#! ~~~
+#!
+#! Removes objects of the specified types from the active selection
+#!
+procedure minusTypes (.types$)
+  @saveSelectionTable()
+  .selection = saveSelectionTable.table
+
+  @refineToTypes(.types$)
+  .deselected$ = refineToTypes.found$
+
+  @saveSelectionTable()
+  .deselect = saveSelectionTable.table
+
+  @restoreSavedSelection(.selection)
+  @minusSavedSelection(.deselect)
+  removeObject: .selection, .deselect
+endproc
+
+#
+# Internal procedures
+#
+
+#! ### `_AppendToSelectionTable`
+#!
+#! ~~~ params
+#! in:
+#!   - .table: The ID of the selection table to modify
+#! out:
+#!   - .id: The ID of an object
+#! selection:
+#!   out: true
+#! internal: addToSelectionTable
+#! ~~~
+#!
+#! Internal procedure to push objects to selection tables.
+#!
+#! This procedure is for internal use only. In most cases,
+#! [`addToSelectionTable()`](#add-to-selection-table) should be
+#! prefered for adding objects to existing selections.
+#!
+#! Internal procedures have no checks, may modify the selection, and have
+#! behaviours that may change in the future.
+#!
+procedure _AppendToSelectionTable (.table, .id)
+  selectObject: .id
+  .type$ = extractWord$(selected$(), "")
+  .name$ = extractWord$(selected$(), .type$)
+
+  selectObject: .table
+  Append row
+  .r = Object_'.table'.nrow
+  Set string value:  .r, "type", .type$
+  Set string value:  .r, "name", .name$
+  Set numeric value: .r, "n",    1
+  Set numeric value: .r, "id",   .id
+endproc
+
+#! ### `_RemoveFromSelectionTable`
+#!
+#! ~~~ params
+#! in:
+#!   - .table: The ID of the selection table to modify
+#! out:
+#!   - .id: The ID of an object
+#! selection:
+#!   out: true
+#! internal: removeFromSelectionTable
+#! ~~~
+#!
+#! Internal procedure to remove objects from selection tables
+#!
+#! This procedure is for internal use only. In most cases,
+#! [`removeFromSelectionTable()`](#remove-from-selection-table) should
+#! be prefered for removing objects from existing selections.
+#!
+#! Internal procedures have no checks, may modify the selection, and have
+#! behaviours that may change in the future.
+#!
+procedure _RemoveFromSelectionTable (.table, .id)
+  selectObject: .table
+  .row = Search column: "id", string$(.id)
+
+  if .row
+    Remove row: .row
+  endif
+endproc
+
+#! ### `_IsSelectionTable`
+#!
+#! ~~~ params
+#! in:
+#!   - .id: The ID of an object to test
+#! out:
+#!   - .return: `1` if the object looks like a selection table, `0` otherwise.
+#! internal: true
+#! ~~~
+#!
+#! Internal procedure to check if the object with a specific id is
+#! (or looks like) a valid selection table.
+#!
+#! Internal procedures have no checks, may modify the selection, and have
+#! behaviours that may change in the future.
+#!
+procedure _IsSelectionTable (.id)
+  .return = 0
+
+  # Hack to restore selection avoiding procedure-call loop
+  .n = numberOfSelected()
+  for .i to .n
+    .id[.i] = selected(.i)
+  endfor
+
+  @_ObjectExists(.id)
+  if '_ObjectExists.return'
+    selectObject: .id
+    if numberOfSelected("Table")
+      .columns$ = List: 0
+      .columns$ = tab$ + left$(.columns$, index(.columns$, newline$) - 1) + tab$
+      if    index(.columns$, tab$ + "type" + tab$) and
+        ... index(.columns$, tab$ + "name" + tab$) and
+        ... index(.columns$, tab$ + "n"    + tab$) and
+        ... index(.columns$, tab$ + "id"   + tab$)
+        .return = 1
+      endif
+    endif
+  endif
+
+  # Hack to restore selection avoiding procedure-call loop
+  @clearSelection()
+  for .i to .n
+    plusObject: .id[.i]
+  endfor
+endproc
+
+#! ### `_IsValidType`
+#!
+#! ~~~ params
+#! in:
+#!   - .type$: A string to test against the list of known object types
+#! out:
+#!   - .return: `1` if the string is the name of an object, `0` otherwise.
+#! internal: true
+#! ~~~
+#!
+#! Internal procedure to check if a string represents a valid object type.
+#!
+#! Internal procedures have no checks, may modify the selection, and have
+#! behaviours that may change in the future.
+#!
+procedure _IsValidType (.type$)
+  .objects$ = List readable types of objects
+  .objects$ = replace_regex$(.objects$, ".*\t(.*)$", "\1", 0)
+  .objects$ = replace$(.objects$, newline$, " ", 0)
+  .objects$ = " " + .objects$ + " "
+  .return = if index(.objects$, " " + .type$ + " ") then 1 else 0 fi
+endproc
+
+#! ### `_ObjectExists`
+#!
+#! ~~~ params
+#! in:
+#!   - .id: A number likely to be an object ID
+#! out:
+#!   - .return: >
+#!     `1` if the `.id` variable points to an existing object, `0` otherwise.
+#! internal: true
+#! ~~~
+#!
+#! Internal procedure to check if an object exists in the object list.
+#!
+#! Internal procedures have no checks, may modify the selection, and have
+#! behaviours that may change in the future.
+#!
+procedure _ObjectExists (.id)
+  .start = numberOfSelected()
+  nocheck plusObject: .id
+  .plus = numberOfSelected()
+  nocheck minusObject: .id
+  .minus = numberOfSelected()
+
+  if .plus = .minus
+    # Object does not exist
+    .return = 0
+  else
+    .return = 1
+    if .start < .plus
+      minusObject: .id
+    else
+      plusObject: .id
+    endif
+  endif
+endproc
+
+#! ### `_IsSelected`
+#!
+#! ~~~ params
+#! in:
+#!   - .id: The ID of an object
+#! out:
+#!   - .return: >
+#!     `1` if the `.id` variable points to a currently selected object,
+#!      `0` otherwise.
+#! internal: true
+#! ~~~
+#!
+#! Internal procedure to check if an object is currently selected
+#!
+#! Internal procedures have no checks, may modify the selection, and have
+#! behaviours that may change in the future.
+#!
+procedure _IsSelected (.id)
+  .n = numberOfSelected()
+  .return = 0
+  for .i to .n
+    if selected(.i) = .id
+      .return = 1
+    endif
+  endfor
+endproc
