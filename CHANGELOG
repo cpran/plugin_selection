@@ -1,3 +1,22 @@
+- next: # unreleased
+- v0.0.10:
+  - New:
+    - Tests using @try in utils for usage of `restore_nocheck`
+  - Changes:
+    - Updated requirements to utils 0.0.17 and testsimple 0.0.8
+    - Broke down `selection.proc` into multiple smaller files which can be
+      included separately:
+
+      tiny.proc
+        : Lightweight and anonymous selection handling, does not include
+          any other files
+      tables.proc
+        : Contains all of the procedures using selection tables. Includes
+          utils.proc.
+      objects.proc
+        : Contains all of the procedures using object tables. Includes
+          tables.proc.
+      selection.proc remains usable, and includes all of the above.
 - v0.0.9:
   - Updated and simplified tests (not using ok_formula)
   - Added this changelog
