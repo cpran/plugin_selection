@@ -7,7 +7,7 @@ Depends:
   praat: 5.0.0+
   Plugins:
     utils: 0.0.17+
-    tap: 0.0.9+
+    tap: 0.0.10+
 Recommends:
 License: GPL3
 Readme: readme.md
