@@ -1,4 +1,6 @@
 - next: # unreleased
+  - Changes:
+    - Use tap plugin instead of testsimple.
 - v0.0.10:
   - New:
     - Tests using @try in utils for usage of `restore_nocheck`
