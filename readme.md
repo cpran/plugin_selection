@@ -1,16 +1,26 @@
 # Selection tools [![build badge][badge]][build]
 
-The file [selection.proc][selection] defines a set of procedures to try to
-make it easier to manage the selection of objects in Praat. It is an attempt at
-providing some sort of informal API of sorts to save various selections, restore
+The files in this plugin define a set of procedures to make it easier to manage 
+the selection of objects in Praat. It is an attempt at providing what was
+considered to be a missing part of the API, to save various selections, restore
 them at will, modify them, etc.
-
-[selection]: https://gitlab.com/cpran/plugin_selection/blob/master/procedures/selection.proc
 
 ## Usage
 
 ~~~~
+# Includes all procedures
 include ../../plugin_selection/procedures/selection.proc
+
+# You can also opt just for the most basic ones
+# which do not use selection tables
+include ../../plugin_selection/procedures/tiny.proc
+
+# Or just for those using tables
+# (which are also the most useful)
+include ../../plugin_selection/procedures/tables.proc
+
+# Or include the procedures for selection checking
+include ../../plugin_selection/procedures/objects.proc
 ~~~~
 
 ## Overview
@@ -42,12 +52,12 @@ with two exceptions: [saveSelection()][saveselection] and
 Below, all procedures are explained in an order that will hopefully make it
 easier to learn how to use them.
 
-Please see [the documentation](https://gitlab.com/cpran/plugin_selection/wikis/home)
+Please see [the documentation](http://cpran.net/docs/plugins/selection)
 for more detailed information on how to use these procedures.
 
 ## Requirements:
 
-* [utils](https://gitlab.com/cpran/plugin_utils)
+* [utils](http://cpran.net/plugins/utils)
 
 [badge]: https://ci.gitlab.com/projects/2841/status.png?ref=master
 [build]: https://ci.gitlab.com/projects/2841
