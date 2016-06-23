@@ -3,11 +3,11 @@ variables:
 
 before_script:
   - pushd ..
-  - rm -rf plugin_{utils,testsimple}
-  - git clone ${CPRAN_GIT}testsimple.git
+  - rm -rf plugin_{utils,tap}
+  - git clone ${CPRAN_GIT}tap.git
   - git clone ${CPRAN_GIT}utils.git
   - popd
-      
+
 Praat 5.4.22:
   script:
     - prove -v --exec "praat-5.4.22 --ansi --pref-dir=../.."
