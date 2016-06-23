@@ -1,5 +1,5 @@
 include ../procedures/selection.proc
-include ../../plugin_testsimple/procedures/test_simple.proc
+include ../../plugin_tap/procedures/simple.proc
 
 @plan(5)
 
