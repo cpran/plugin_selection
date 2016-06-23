@@ -1,4 +1,5 @@
 - next: # unreleased
+- v0.0.11:
   - Changes:
     - Use tap plugin instead of testsimple.
 - v0.0.10:
