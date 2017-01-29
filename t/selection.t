@@ -1,5 +1,5 @@
 include ../procedures/selection.proc
-include ../../plugin_tap/procedures/simple.proc
+include ../../plugin_tap/procedures/more.proc
 
 @plan(4)
 
@@ -13,7 +13,7 @@ Extract non-empty intervals: 3, "no"
 removeObject: synth, sound, textgrid
 
 @saveSelection()
-@ok: saveSelection.n,
+@cmp_ok: saveSelection.n, "==", 5,
   ... "loaded tiny procedures"
 
 @saveSelectionTable()
