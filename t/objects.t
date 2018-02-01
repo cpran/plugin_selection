@@ -4,7 +4,16 @@ include ../../plugin_tap/procedures/simple.proc
 @plan(5)
 
 ## Create test sounds
-synth = Create SpeechSynthesizer: "English", "default"
+
+if praatVersion >= 6036
+  synth_language$ = "English (Great Britain)"
+  synth_voice$ = "Male1"
+else
+  synth_language$ = "English"
+  synth_voice$ = "default"
+endif
+
+synth = Create SpeechSynthesizer: synth_language$, synth_voice$
 To Sound: "This is some funky text", "yes"
 sound = selected("Sound")
 textgrid = selected("TextGrid")
