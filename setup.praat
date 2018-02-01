@@ -22,10 +22,10 @@ nocheck Add menu command: "Objects", "Praat", "Copy selected objects...", "selec
 nocheck Add menu command: "Objects", "Praat", "Sort selected objects...", "selection", 2, "scripts/sort_objects.praat"
 
 # Object selection menu
-Add menu command: "Objects", "Praat", "Select one type...",       "selection", 2, "scripts/select_one_type.praat"
-Add menu command: "Objects", "Praat", "Select all of this type",  "selection", 2, "scripts/select_selected_type.praat"
-Add menu command: "Objects", "Praat", "Invert selection",         "selection", 2, "scripts/invert_selection.praat"
-Add menu command: "Objects", "Praat", "Save selection",           "selection", 2, "scripts/save_selection.praat"
+Add menu command: "Objects", "Praat", "Select per type...",          "selection", 2, "scripts/select_types.praat"
+Add menu command: "Objects", "Praat", "Select types from selection", "selection", 2, "scripts/select_selected_types.praat"
+Add menu command: "Objects", "Praat", "Invert selection",            "selection", 2, "scripts/invert_selection.praat"
+Add menu command: "Objects", "Praat", "Save selection",              "selection", 2, "scripts/save_selection.praat"
 
 ## Dynamic commands
 
