@@ -46,7 +46,7 @@ sort_fields$ = replace$(sort_fields$, " ", "", 0)
 fields = split.length
 sort_fields$ = ""
 for i to fields
-  fields$[i] = split.array$[i]
+  fields$[i] = split.return$[i]
   if index(" " + supported_fields$ + " ", " " + fields$[i] + " ")
     if i = 1
       sort_fields$ = fields$[i] + " "
