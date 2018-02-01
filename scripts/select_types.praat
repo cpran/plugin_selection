@@ -23,7 +23,7 @@ include ../../plugin_utils/procedures/utils.proc
 include ../../plugin_selection/procedures/selection.proc
 
 form Select types...
-  word Types Sound TextGrid
+  sentence Types Sound TextGrid
   boolean Refine_current_selection yes
   comment You can specify multiple types separated by spaces
 endform
