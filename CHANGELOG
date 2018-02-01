@@ -1,4 +1,10 @@
 - next: # unreleased
+- v0.0.12:
+  - Changes:
+    - Menu commands now use scripts supporting multiple types
+  - Fix:
+    - Tests pass under 6.0.36 by removing deprecated command parameters
+    - Script to select multiple types supports multiple types as input
 - v0.0.11:
   - Changes:
     - Use tap plugin instead of testsimple.
